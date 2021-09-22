@@ -84,7 +84,7 @@ const useStyles = makeStyles((theme) => ({
 const mainFeaturedPost = {
   title: 'Lords Eye',
   description:
-    "Alerts users about unsafe zone and also hazardous or accident prone zones while traveling",
+    "Alerts users about unsafe zone, hazardous or accident prone zones while traveling",
     image: "https://lumiere-a.akamaihd.net/v1/images/sa_pixar_virtualbg_coco_16x9_9ccd7110.jpeg",
   // https://www.futurismtechnologies.com/wp-content/uploads/2019/01/ai-bot-banner.jpg
   imgText: 'main image description',

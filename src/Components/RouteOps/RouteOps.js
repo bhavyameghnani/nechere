@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default class TreeMap extends React.Component {
+export default class RouteOps extends React.Component {
     mapRef = React.createRef();
 
     state = {

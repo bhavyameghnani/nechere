@@ -11,9 +11,9 @@ import Link from '@material-ui/core/Link';
 
 const sections = [
   { title: 'Home', url: '#/home' },
-  { title: 'Tab 1', url: '#/home' },
-  { title: 'Tab 2', url: '#/home' },
-  { title: 'Tab 3', url: '#/home' },
+  { title: 'Route Optimisation', url: '#/route' },
+  { title: 'Trees for Future', url: '#/tree' },
+  { title: 'Issue Tracker', url: '#/tracker' },
   { title: 'Tab 4', url: '#/home' },
 ];
 

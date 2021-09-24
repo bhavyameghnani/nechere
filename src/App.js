@@ -6,6 +6,7 @@ import Home from './Components/LandingPage/LandingPage';
 import TreeMap from './Components/TreePlantation/TreeMap';
 import RouteOps from './Components/RouteOps/RouteOps';
 import TreePlantation from './Components/TreePlantation/TreePlantation';
+import IssueTracker from './Components/IssueTracker/IssueTracker';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route exact path="/signup" component={SignUpPage}/>
             <Route exact path="/home" component={Home}/>
             <Route exact path="/tree" component={TreePlantation}/>
+            <Route exact path="/tracker" component={IssueTracker}/>
             <Route exact path="/treemap" component={TreeMap}/>
             <Route exact path="/route" component={RouteOps}/>
           </Switch>

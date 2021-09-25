@@ -1,4 +1,5 @@
 import React from 'react';
+import * as Constants from '../../Constants';
 
 export default class UnSafeZones extends React.Component {
     mapRef = React.createRef();
@@ -46,11 +47,11 @@ export default class UnSafeZones extends React.Component {
   
   
     addAllZones(map){
-        this.addCircleToMap(map,19.016211, 72.840183, 50, 'red');
-        this.addCircleToMap(map,19.018896, 72.839226, 45, 'red');
-        this.addCircleToMap(map,19.016055, 72.836506, 30, 'red');
-        this.addCircleToMap(map,19.013306, 72.837300, 35, 'red');
-        this.addCircleToMap(map,19.020045, 72.837964, 25, 'red');
+        this.addCircleToMap(map,19.016211, 72.840183, 50, Constants.UNSAFE_ZONE);
+        this.addCircleToMap(map,19.018896, 72.839226, 45, Constants.UNSAFE_ZONE);
+        this.addCircleToMap(map,19.016055, 72.836506, 30, Constants.UNSAFE_ZONE);
+        this.addCircleToMap(map,19.013306, 72.837300, 35, Constants.UNSAFE_ZONE);
+        this.addCircleToMap(map,19.020045, 72.837964, 25, Constants.UNSAFE_ZONE);
     }
 
     addCircleToMap(map, lat, long, radius, color){

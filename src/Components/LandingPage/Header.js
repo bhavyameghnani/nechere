@@ -14,7 +14,7 @@ const sections = [
   { title: 'Route Optimisation', url: '#/route' },
   { title: 'Trees for Future', url: '#/tree' },
   { title: 'Issue Tracker', url: '#/tracker' },
-  { title: 'Tab 4', url: '#/home' },
+  { title: 'CommunityEvent', url: '#/event' },
 ];
 
 const useStyles = makeStyles((theme) => ({

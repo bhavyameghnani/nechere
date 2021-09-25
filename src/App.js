@@ -7,12 +7,12 @@ import TreeMap from './Components/TreePlantation/TreeMap';
 import RouteOps from './Components/RouteOps/RouteOps';
 import TreePlantation from './Components/TreePlantation/TreePlantation';
 import IssueTracker from './Components/IssueTracker/IssueTracker';
+import CommunityEvent from './Components/CommunityEvent/CommunityEvent';
 import UnSafeZones from './Components/UnSafeZones/UnSafeZones';
 
 function App() {
   return (
     <div className="App">
-      {/* <header className="App-header"> */}
       <HashRouter>
           <Switch>
             <Route exact path="/" component={Home}/>
@@ -23,10 +23,10 @@ function App() {
             <Route exact path="/tracker" component={IssueTracker}/>
             <Route exact path="/treemap" component={TreeMap}/>
             <Route exact path="/route" component={RouteOps}/>
+            <Route exact path="/event" component={CommunityEvent}/>
             <Route exact path="/zones" component={UnSafeZones}/>
           </Switch>
       </HashRouter>
-      {/* </header> */}
     </div>
   );
 }

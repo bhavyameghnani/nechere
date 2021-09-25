@@ -11,7 +11,7 @@ export default class TreeMap extends React.Component {
     componentDidMount() {
       const H = window.H;
       const platform = new H.service.Platform({
-          apikey: "API-KEY"
+          apikey: "bEe33LxPaw30KNQOQRUSb8-npEfpmTBCDq2xckKvN2w"
       });
   
       const defaultLayers = platform.createDefaultLayers();

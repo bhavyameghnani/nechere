@@ -7,6 +7,7 @@ import TreeMap from './Components/TreePlantation/TreeMap';
 import RouteOps from './Components/RouteOps/RouteOps';
 import TreePlantation from './Components/TreePlantation/TreePlantation';
 import IssueTracker from './Components/IssueTracker/IssueTracker';
+import UnSafeZones from './Components/UnSafeZones/UnSafeZones';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route exact path="/tracker" component={IssueTracker}/>
             <Route exact path="/treemap" component={TreeMap}/>
             <Route exact path="/route" component={RouteOps}/>
+            <Route exact path="/zones" component={UnSafeZones}/>
           </Switch>
       </HashRouter>
       {/* </header> */}

@@ -1,314 +1,119 @@
 import React from 'react';
+import * as Constants from '../../Constants';
 
 export default class RouteOps extends React.Component {
     mapRef = React.createRef();
 
     state = {
       // The map instance to use during cleanup
-      map: null,
-      bubble: null,
-      ui:null
+      map: null
     };
-  
-    componentDidMount() {
 
-/**
-   * Boilerplate map initialization code starts below:
-   */
-  
-  // set up containers for the map + panel
-  const mapContainer = document.getElementById('map'),
-    routeInstructionsContainer = document.getElementById('panel');
-    const H = window.H;
-  // Step 1: initialize communication with the platform
-  // In your own code, replace variable window.apikey with your own apikey
-  var platform = new H.service.Platform({
-    apikey: "bEe33LxPaw30KNQOQRUSb8-npEfpmTBCDq2xckKvN2w"
+
+componentDidMount() {
+
+// Instantiate a map and platform object:
+const H = window.H;
+var platform = new H.service.Platform({
+    'apikey': 'bEe33LxPaw30KNQOQRUSb8-npEfpmTBCDq2xckKvN2w'
   });
+  // Retrieve the target element for the map:
+  var targetElement = document.getElementById('mapContainer');
   
+  // Get the default map types from the platform object:
   var defaultLayers = platform.createDefaultLayers();
   
-  // Step 2: initialize a map - this map is centered over Berlin
-  var map = new H.Map(mapContainer,
-    defaultLayers.vector.normal.map, {
-    center: {lat: 52.5160, lng: 13.3779},
-    zoom: 13,
-    pixelRatio: window.devicePixelRatio || 1
-  });
+  // Instantiate the map:
   
-  // add a resize listener to make sure that the map occupies the whole container
-  window.addEventListener('resize', () => map.getViewPort().resize());
+  var map = new H.Map(
+    this.mapRef.current,
+    defaultLayers.vector.normal.map,
+    {
+      zoom: 10,
+      center: { lat: 19.0225634, lng:72.8374501 }
+    });
   
-  // Step 3: make the map interactive
-  // MapEvents enables the event system
-  // Behavior implements default interactions for pan/zoom (also on mobile touch environments)
-  var behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
-  
-  // Create the default UI components
-  var ui = H.ui.UI.createDefault(map, defaultLayers);
-  this.setState({
-      ui:ui
-  })
-  // Hold a reference to any infobubble opened
-  
-// Now use the map as required...
-this.calculateRouteFromAtoB(platform);
-    this.setState({ map });
-    // this.addMarkersToMap(map);
-  }
-  componentWillUnmount() {
-    this.state.map.dispose();
-  }
+  // Create the parameters for the routing request:
+  var routingParameters = {
+    'routingMode': 'fast',
+    'transportMode': 'car',
+    // The start point of the route:
+    'origin': '19.0225634,72.8374501',
+    // The end point of the route:
+    'destination': '19.0812189,72.8909388',
+    // Include the route shape in the response
+    'return': 'polyline'
+  };
 
+      const behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
 
-/**
- * Calculates and displays a car route from the Brandenburg Gate in the centre of Berlin
- * to Friedrichstraße Railway Station.
- *
- * A full list of available request parameters can be found in the Routing API documentation.
- * see: http://developer.here.com/rest-apis/documentation/routing/topics/resource-calculate-route.html
- *
- * @param {H.service.Platform} platform A stub class to access HERE services
- */
-  calculateRouteFromAtoB(platform) {
-    var router = platform.getRoutingService(null, 8),
-        routeRequestParams = {
-          routingMode: 'fast',
-          transportMode: 'car',
-          origin: '52.5160,13.3779', // Brandenburg Gate
-          destination: '52.5206,13.3862', // Friedrichstraße Railway Station
-          return: 'polyline,turnByTurnActions,actions,instructions,travelSummary'
-        };
+      const ui = H.ui.UI.createDefault(map, defaultLayers);
   
-    router.calculateRoute(
-      routeRequestParams,
-      this.onSuccess,
-      this.onError
-    );
-  }
+  // Define a callback function to process the routing response:
+  var onResult = function(result) {
+    // ensure that at least one route was found
+    if (result.routes.length) {
+      result.routes[0].sections.forEach((section) => {
+           // Create a linestring to use as a point source for the route line
+          let linestring = H.geo.LineString.fromFlexiblePolyline(section.polyline);
   
-  /**
-   * This function will be called once the Routing REST API provides a response
-   * @param {Object} result A JSONP object representing the calculated route
-   *
-   * see: http://developer.here.com/rest-apis/documentation/routing/topics/resource-type-calculate-route.html
-   */
-    onSuccess(result) {
-    var route = result.routes[0];
+          // Create a polyline to display the route:
+          let routeLine = new H.map.Polyline(linestring, {
+            style: { strokeColor: 'blue', lineWidth: 3 }
+          });
   
-    /*
-     * The styling of the route response on the map is entirely under the developer's control.
-     * A representative styling can be found the full JS + HTML code of this example
-     * in the functions below:
-     */
-    // this.addRouteShapeToMap(route);
-    // this.addManueversToMap(route);
-    // this.addWaypointsToPanel(route);
-    // this.addManueversToPanel(route);
-    // this.addSummaryToPanel(route);
-    // ... etc.
-  }
+          // Create a marker for the start point:
+          let startMarker = new H.map.Marker(section.departure.place.location);
   
-  /**
-   * This function will be called if a communication error occurs during the JSON-P request
-   * @param {Object} error The error message received.
-   */
-   onError(error) {
-    alert('Can\'t reach the remote server');
-  }
+          // Create a marker for the end point:
+          let endMarker = new H.map.Marker(section.arrival.place.location);
   
+          // Add the route polyline and the two markers to the map:
+          map.addObjects([routeLine, startMarker, endMarker]);
   
-  
-  /**
-   * Opens/Closes a infobubble
-   * @param {H.geo.Point} position The location on the map.
-   * @param {String} text          The contents of the infobubble.
-   */
-   openBubble(position, text) {
-    const H = window.H;
-    var ui = this.state.ui;
-    if (!this.state.bubble) {
-      var bubble = new H.ui.InfoBubble(
-        position,
-        // The FO property holds the province name.
-        {content: text});
-      ui.addBubble(bubble);
-    } else {
-      bubble.setPosition(position);
-      bubble.setContent(text);
-      bubble.open();
+          // Set the map's viewport to make the whole route visible:
+          map.getViewModel().setLookAtData({bounds: routeLine.getBoundingBox()});
+      });
     }
-    this.setState({
-        bubble:bubble,
-        ui:ui
-    })
-  }
+  };
   
-  /**
-   * Creates a H.map.Polyline from the shape of the route and adds it to the map.
-   * @param {Object} route A route as received from the H.service.RoutingService
-   */
- addRouteShapeToMap(route) {
-    var map = this.state.map
-    route.sections.forEach((section) => {
-      // decode LineString from the flexible polyline
-      const H = window.H;
-      let linestring = H.geo.LineString.fromFlexiblePolyline(section.polyline);
-  
-      // Create a polyline to display the route:
-      let polyline = new H.map.Polyline(linestring, {
-        style: {
-          lineWidth: 4,
-          strokeColor: 'rgba(0, 128, 255, 0.7)'
-        }
-      });
-  
-      // Add the polyline to the map
-      
-      map.addObject(polyline);
-      // And zoom to its bounding rectangle
-      map.getViewModel().setLookAtData({
-        bounds: polyline.getBoundingBox()
-      });
-      
-    });
-    this.setState({
-        map:map
-    })
-  }
-  
-  /**
-   * Creates a series of H.map.Marker points from the route and adds them to the map.
-   * @param {Object} route A route as received from the H.service.RoutingService
-   */
-   addManueversToMap(route) {
-    const H = window.H;
-    var svgMarkup = '<svg width="18" height="18" ' +
-      'xmlns="http://www.w3.org/2000/svg">' +
-      '<circle cx="8" cy="8" r="8" ' +
-        'fill="#1b468d" stroke="white" stroke-width="1" />' +
-      '</svg>',
-      dotIcon = new H.map.Icon(svgMarkup, {anchor: {x:8, y:8}}),
-      group = new H.map.Group(),
-      i,
-      j;
-      var map = this.state.map;
-    route.sections.forEach((section) => {
-      let poly = H.geo.LineString.fromFlexiblePolyline(section.polyline).getLatLngAltArray();
-     
-      let actions = section.actions;
-      // Add a marker for each maneuver
-      for (i = 0; i < actions.length; i += 1) {
-        let action = actions[i];
-        var marker = new H.map.Marker({
-          lat: poly[action.offset * 3],
-          lng: poly[action.offset * 3 + 1]},
-          {icon: dotIcon});
-        marker.instruction = action.instruction;
-        group.addObject(marker);
-      }
-      
-      group.addEventListener('tap', function (evt) {
-        map.setCenter(evt.target.getGeometry());
-        this.openBubble(evt.target.getGeometry(), evt.target.instruction);
-      }, false);
-  
-      // Add the maneuvers group to the map
-      map.addObject(group);
-    });
-    this.setState({
-        map:map
-    })
-  }
-  
-  /**
-   * Creates a series of H.map.Marker points from the route and adds them to the map.
-   * @param {Object} route A route as received from the H.service.RoutingService
-   */
-   addWaypointsToPanel(route) {
-    var nodeH3 = document.createElement('h3'),
-      labels = [];
-  
-    route.sections.forEach((section) => {
-      labels.push(
-        section.turnByTurnActions[0].nextRoad.name[0].value)
-      labels.push(
-        section.turnByTurnActions[section.turnByTurnActions.length - 1].currentRoad.name[0].value)
+  // Get an instance of the routing service version 8:
+  var router = platform.getRoutingService(null, 8);
+  this.addCircleToMap(map,19.070894, 72.894803, Constants.UNSAFE_ZONE_RADIUS_ROUTE, Constants.UNSAFE_ZONE)
+  this.addCircleToMap(map,19.042697, 72.873981, Constants.UNSAFE_ZONE_RADIUS_ROUTE, Constants.UNSAFE_ZONE)
+  // Call calculateRoute() with the routing parameters,
+  // the callback and an error callback function (called if a
+  // communication error occurs):
+  router.calculateRoute(routingParameters, onResult,
+    function(error) {
+      alert(error.message);
     });
   
-    nodeH3.textContent = labels.join(' - ');
-    this.routeInstructionsContainer.innerHTML = '';
-    this.routeInstructionsContainer.appendChild(nodeH3);
-  }
-  
-  /**
-   * Creates a series of H.map.Marker points from the route and adds them to the map.
-   * @param {Object} route A route as received from the H.service.RoutingService
-   */
-   addSummaryToPanel(route) {
-    let duration = 0,
-      distance = 0;
-  
-    route.sections.forEach((section) => {
-      distance += section.travelSummary.length;
-      duration += section.travelSummary.duration;
-    });
-  
-    var summaryDiv = document.createElement('div'),
-      content = '<b>Total distance</b>: ' + distance + 'm. <br />' +
-        '<b>Travel Time</b>: ' + this.toMMSS(duration) + ' (in current traffic)';
-  
-    summaryDiv.style.fontSize = 'small';
-    summaryDiv.style.marginLeft = '5%';
-    summaryDiv.style.marginRight = '5%';
-    summaryDiv.innerHTML = content;
-    this.routeInstructionsContainer.appendChild(summaryDiv);
-  }
-  
-  /**
-   * Creates a series of H.map.Marker points from the route and adds them to the map.
-   * @param {Object} route A route as received from the H.service.RoutingService
-   */
-   addManueversToPanel(route) {
-    var nodeOL = document.createElement('ol');
-  
-    nodeOL.style.fontSize = 'small';
-    nodeOL.style.marginLeft ='5%';
-    nodeOL.style.marginRight ='5%';
-    nodeOL.className = 'directions';
-  
-    route.sections.forEach((section) => {
-      section.actions.forEach((action, idx) => {
-        var li = document.createElement('li'),
-          spanArrow = document.createElement('span'),
-          spanInstruction = document.createElement('span');
-  
-        spanArrow.className = 'arrow ' + (action.direction || '') + action.action;
-        spanInstruction.innerHTML = section.actions[idx].instruction;
-        li.appendChild(spanArrow);
-        li.appendChild(spanInstruction);
-  
-        nodeOL.appendChild(li);
-      });
-    });
-  
-    this.routeInstructionsContainer.appendChild(nodeOL);
-  }
-  
-   toMMSS(duration) {
-    return Math.floor(duration / 60) + ' minutes ' + (duration % 60) + ' seconds.';
-  }
-  
-  
+}
 
+addCircleToMap(map, lat, long, radius, color){
+    const H = window.H;
+    map.addObject(new H.map.Circle(
+      // The central point of the circle
+      {lat:lat, lng:long},
+      // The radius of the circle in meters
+      radius,
+      {
+        style: {
+        //   strokeColor: 'rgba(55, 85, 170, 0.6)', // Color of the perimeter
+          lineWidth: 1,
+          fillColor: color  // Color of the circle
+        }
+      }
+    ));
+  }
   
     render() {
       return (
         // Set a height on the map so it will display
         <div>
             <center>
-            <div id="map"></div>
-             <div id="panel"></div>            
+            <div ref={this.mapRef} style={{ width:"80%", height: "500px" }} />   
              </center>
       </div>
        
